@@ -36,8 +36,8 @@ services:
       - 9000:9000
     ulimits:
       nofile:
-        soft: "65636"
-        hard: "65636"
+        soft: "261244"
+        hard: "261244"
     environment:
       - sonar.jdbc.username=sonar
       - sonar.jdbc.password=sonar
