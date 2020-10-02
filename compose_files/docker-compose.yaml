@@ -1,0 +1,65 @@
+---
+version: '3.7'
+services:
+  jenkins-docker:
+    image: docker:dind
+    privileged: true
+    user: root
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+      - JAVA_OPTS=-Duser.timezone=Europe/Moscow
+    ports:
+      - 2376:2376
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+  jenkins:
+    image: jenkinsci/blueocean
+    privileged: true
+    user: root
+    ports:
+      - 8080:8080
+      - 50000:50000
+    container_name: jenkins
+    volumes:
+      - /opt/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/docker:/usr/local/bin/docker
+  sonarqube:
+    image: sonarqube
+    container_name: sonarqube
+    hostname: sonarqube
+    expose:
+      - 9000
+    user: "1002:1002"
+    ports:
+      - 9000:9000
+    ulimits:
+      nofile:
+        soft: "65636"
+        hard: "65636"
+    environment:
+      - sonar.jdbc.username=sonar
+      - sonar.jdbc.password=sonar
+      - sonar.jdbc.url=jdbc:postgresql://db/sonar
+      - sonar.search.javaAdditionalOpts=-Dbootstrap.system_call_filter=false
+    volumes:
+      - /opt/sonarqube/logs:/opt/sonarqube/logs
+      - /opt/sonarqube/conf:/opt/sonarqube/conf
+      - /opt/sonarqube/temp:/opt/sonarqube/temp
+      - /opt/sonarqube/data:/opt/sonarqube/data
+      - /opt/sonarqube/extensions:/opt/sonarqube/extensions
+
+  db:
+    image: postgres:12.0
+    container_name: postgres
+    hostname: postgres
+    environment:
+      - POSTGRES_USER=sonar
+      - POSTGRES_PASSWORD=sonar
+    volumes:
+      - /opt/postgres/lib:/var/lib/postgresql
+      - /opt/postgres/data:/var/lib/postgresql/data
+volumes:
+  jenkins-docker-certs:
+  jenkins-data:
