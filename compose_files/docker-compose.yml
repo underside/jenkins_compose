@@ -37,7 +37,7 @@ services:
     hostname: sonarqube
     expose:
       - 9000
-    user: "1002:1002"
+    user: "1005:1005"
     ports:
       - 9000:9000
     ulimits:
@@ -49,6 +49,7 @@ services:
       - sonar.jdbc.password=sonar
       - sonar.jdbc.url=jdbc:postgresql://db/sonar
       - sonar.search.javaAdditionalOpts=-Dbootstrap.system_call_filter=false
+      - sonar.search.javaAdditionalOpts=-Dsonar.search.javaAdditionalOpts=-Xmx512m
     volumes:
       - /opt/sonarqube/logs:/opt/sonarqube/logs
       - /opt/sonarqube/conf:/opt/sonarqube/conf
