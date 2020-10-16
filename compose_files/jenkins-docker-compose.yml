@@ -1,0 +1,28 @@
+version: '3.7'
+services:
+  jenkins-docker:
+    image: docker:dind
+    privileged: true
+    user: root
+    environment:
+      - DOCKER_TLS_CERTDIR=/certs
+    ports:
+      - 2376:2376
+    volumes:
+      - jenkins-docker-certs:/certs/client
+      - jenkins-data:/var/jenkins_home
+  jenkins:
+    image: jenkinsci/blueocean
+    privileged: true
+    user: root
+    ports:
+      - 8080:8080
+      - 50000:50000
+    container_name: jenkins
+    volumes:
+      - /opt/jenkins:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /usr/local/bin/docker:/usr/local/bin/docker
+volumes:
+  jenkins-docker-certs:
+  jenkins-data:

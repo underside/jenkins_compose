@@ -1,0 +1,68 @@
+pipeline {
+agent any 
+
+stages {
+  stage("Artifactory config") {
+            steps {
+               rtServer(
+                    id: "ARTIFACTORY_SERVER",
+                    url: SERVER_URL,
+                    credentialsID: CREDENTIALS,
+                )
+            }
+  }
+
+  stage("Clone") {
+            options {
+                timeout(time: 1, unit: "MINUTES")
+                ansiColor('xterm')
+            }
+            steps {
+                echo 'Cloning repo with J file...' 
+                git branch: 'master' url: "https://github.com/underside/test-project.git" 
+    }
+  }
+
+  stage("Build Docker image") {
+            options {
+                timeout(time: 1, unit: "MINUTES")
+                ansiColor('xterm')
+            }
+            steps {
+                docker.build(ARTIFACTORY_DOCKER_REGISTRY +  )
+            }
+  }
+
+  stage("Push image to Artifactory") {
+            options {
+                timeout(time: 1, unit: "MINUTES")
+                ansiColor('xterm')
+            }
+            steps {
+                rtDockerPush(
+                    serverId: "ARTIFACTORY_SERVER",
+                    image: ARTIFACTORY_DOCKER_REGISTRY + '/hello-world:latest',
+                    //Host:
+                    //OSX:"tcp://127.0.0.1:1234"
+                    //Linux can be omitted or null
+                    host: HOST_NAME,
+                    targetRepo: 'docker-local',
+                    //Attach custom prop to the published Art-s
+                    properties: 'project-name=docker1;status=stable' 
+                )
+            }
+  }
+
+  stage("Push Build info") {
+            options {
+                timeout(time: 1, unit: "MINUTES")
+                ansiColor('xterm')
+            }
+            steps {
+               rtPublishBuildInfo (
+                    serverId: "ARTIFACTORY_SERVER"
+                ) 
+            }
+  }
+}
+}

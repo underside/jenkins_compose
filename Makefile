@@ -7,30 +7,50 @@ help:  ## This is help dialog. Enter "make" to get help
 	@echo '	 chown_sonarqube_dirs - chown sonarqube dirs'
 	@echo '	 jenkins      - up jenkins container as daemon state'
 	@echo '	 jenkins_down - down jenkins container'
-	@echo '	 prepare_env  - install docker-compose, create users,chown dirs'
-	@echo '	 git_settings  - set git settings'
+	@echo '	 prepare_env_apt  - Debian distrib install docker-compose, create users,chown dirs'
+	@echo '	 prepare_env_yum  - Centos install docker-compose, create users,chown dirs'
 	@echo ''
 
 stack_up:
 	sudo docker-compose -f compose_files/docker-compose.yml up -d
+
 stack_down:
 	sudo docker-compose -f compose_files/docker-compose.yml down
+
 jenkins_up:
 	sudo docker-compose -f compose_files/jenkins.yml up -d
+
 jenkins_down:
 	sudo docker-compose -f compose_files/jenkins.yml down
+
 create_dirs:
-	sudo /usr/bin/python3.8 scripts/mkdir.py
+	sudo /usr/bin/python3 scripts/mkdir.py
+
 create_users:
-	sudo /usr/bin/python3.8 scripts/useradd.py
+	sudo /usr/bin/python3 scripts/useradd.py
+
 chown_sonarqube_dirs:
-	sudo /usr/bin/python3.8 scripts/chown.py
-prepare_env: create_dirs create_users chown_sonarqube_dirs compose_install env_settings
-packages_install:
+	sudo /usr/bin/python3 scripts/chown.py
+
+debian_prepare_env: packages_install_apt create_dirs create_users chown_sonarqube_dirs debian_packages_install env_settings
+
+centos_prepare_env: centos_packages_install create_dirs create_users chown_sonarqube_dirs env_settings
+
+centos_packages_install:
+	sudo chmod +x scripts/centos_install_packages.sh
+	sudo scripts/centos_install_packages.sh
+	sudo firewall-cmd --zone=public --add-masquerade --permanent
+	sudo firewall-cmd --reload
+
+debian_packages_install:
 	sudo apt install -y docker-compose
 	sudo apt install -y git
+
 env_settings:
 	git config --global user.name "Yury Ponomarev"
 	git config --global user.email "underside@ya.ru"
 	git config --global credential.helper store
 	sudo sysctl -w vm.max_map_count=262144
+
+
+
