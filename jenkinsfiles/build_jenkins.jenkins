@@ -9,13 +9,11 @@ pipeline {
         stage('Clone repo') {
             steps {
                 git url: 'https://github.com/kohsuke/jenkins.git'
-                sh "ls -lart ./*" 
-                sh "git branch -a*" 
             }
         }
         stage('Build') {
             steps {
-                sh 'mvn -B -DskipTests clean package'
+                sh 'mvn -Plight-test install'
             }
         }
         // stage('Test') {
