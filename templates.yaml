@@ -1,0 +1,11 @@
+empty_arr: []
+empty_dict: {}
+dependencies:
+  - name: "app"
+    version: "v2"
+    dest: "charts/app"
+    empty_dep: [] 
+helmfiles:
+  - name: "app"
+    version: "v2"
+    dest: "."
